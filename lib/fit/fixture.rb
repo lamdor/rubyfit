@@ -91,6 +91,7 @@ module Fit
             fixture.interpret_tables tables
           rescue Exception => e
             exception fixture_name, e
+            @listener.table_finished(tables)
             interpret_following_tables tables
           end
         end
@@ -217,11 +218,13 @@ module Fit
     end
 
     def exception cell, e
-      stacktrace = e.backtrace.join "\n"
-      message = e.message.gsub(/>/, '&gt;').gsub(/</, '&lt;')
-      cell.add_to_body "<hr><font size=-2><pre>#{message}\n#{stacktrace}</pre></font>"
-      cell.add_to_tag(' bgcolor="' + YELLOW + '"')
-      @counts.exceptions += 1
+       unless cell.tag[YELLOW]
+          stacktrace = e.backtrace.join "\n"
+          message = e.message.gsub(/>/, '&gt;').gsub(/</, '&lt;')
+          cell.add_to_body "<hr><font size=-2><pre>#{message}\n#{stacktrace}</pre></font>"
+          cell.add_to_tag(' bgcolor="' + YELLOW + '"')
+          @counts.exceptions += 1
+       end
     end
     
     def info cell, message
